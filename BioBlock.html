@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <title>BioBlockSample</title>
+<!--STYLES-->
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Cinzel|Lato:300,400');
+
+        body, h3{ font-family: "Lato", sans-serif; font-weight: 300; }
+        body, html{margin: 0; padding: 0;}
+        h1{
+            font-family: 'Cinzel', serif;
+            font-size: xx-large;
+            margin: 0;
+        }
+        h2{
+            font-family: 'Cinzel', serif;
+            font-size: large;
+            text-align: center;
+        }
+
+        a { text-decoration: none; color: #94a0b4; }
+        a:hover{
+            color: rebeccapurple;
+            -o-transition:1s;
+            -ms-transition:1s;
+            -moz-transition:1s;
+            -webkit-transition:1s;
+            transition: 1s;
+        }
+        .titlebox{
+            text-align: center;
+            padding: 20px 0 20px 0;
+            border-bottom: 1px solid #777777;
+        }
+
+        .lister {width: 600px; margin: 0 auto; }
+
+        .chara {
+            border-bottom: 1px solid #777777;
+            width: 100%;
+        }
+
+        .desc {
+            height: 128px;
+            text-align: center;
+            padding: 15px;
+            overflow: visible;
+            position: relative;
+        }
+        .desc:after{
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            height: 100%; width: 100vw;
+            z-index: -1;
+            transition: 0.5s ease;
+        }
+        .desc:hover:after{
+            content: '';
+            background-color: #94a0b4;
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            height: 100%; width: 100vw;
+            z-index: -1;
+            transition: 0.5s ease;
+        }
+        .icon {
+            border-radius: 50%;
+            max-height: 128px;
+            max-width: 128px;
+            vertical-align: middle;
+            float: left;
+            display: block;
+        }
+        .basic{
+            width: auto;
+            overflow: hidden;
+            margin: 5% 0 0 0;
+        }
+        .basic_sub{
+            margin: 0;
+            list-style: none;
+            text-transform: uppercase;
+        }
+        ul {padding: 0;}
+        ul li{ display: inline; white-space: nowrap; }
+        ul li:after { content: " \00b7"; margin: 0 10px 0 10px; }
+        ul li:last-child:after{ content: none; margin: 0; }
+
+        .bio{ width: 100%; }
+        .de { border-top: 1px solid #dcd4cf;}
+        .dkid { text-align: center;}
+        .kid {
+            width: 128px; height: 128px;
+            display: inline-block;
+            position: relative;
+            margin: 0 1% 10px 1%;
+        }
+        .overlay {
+            position: absolute;
+            top: 0; bottom: 0; left: 0; right: 0;
+            width: 128px; height: 128px;
+            line-height: 128px;
+            border-radius: 50%;
+            opacity: 0;
+            transition: .5s ease;
+            background-color: rebeccapurple;
+        }
+        .overlay_text {
+            color: white;
+            display: inline-table;
+            vertical-align: middle;
+            line-height: 100%;
+            text-transform: uppercase;
+        }
+        .kid:hover .overlay{ opacity: 1;}
+
+        .closebio {
+            width: 100%;
+            text-align: center;
+            background-color: #94a0b4;
+            color: white;
+            text-transform: uppercase;
+            padding: 1%;
+            transition: .5s ease;
+        }
+        .closebio:hover {
+            background-color: rebeccapurple;
+            transition: .5s ease;
+        }
+    </style>
+
+<!--SCRIPTS-->
+    <script>
+        jQuery(document).ready(function($){
+            /*$('ul.chara').mouseleave(function() {
+             $(this).find('ul').slideUp('slow');
+             });
+
+             $("ul.chara li").click(function() {
+             $(this).find('ul').slideDown('slow');
+             });*/
+            $(".bio").slideUp('slow');
+            $(".desc").click(function(){
+                var isVisible = $(this).parent(".chara").children(".bio").is(":visible");
+                console.log(isVisible);
+                if (!isVisible){
+                    $(".bio").slideUp('slow');
+                    $(this).parent(".chara").children(".bio").slideToggle();
+                } else {
+                    $(this).parent(".chara").children(".bio").slideToggle();
+                }
+            });
+
+            $(".closebio").click(function(){
+                $(this).parent(".bio").slideUp('slow');
+            });
+        });
+    </script>
+</head>
+<!--BODY BEGINS HERE-->
+<body>
+    <div class="titlebox">
+        <h1>The Consorts of Nohr</h1>
+        <p class="basic_sub">The Many Wives of King Garon</p>
+    </div>
+    <div class="lister">
+    <div class="chara"">
+        <div class="desc">
+            <img class="icon" src="ntc_katerina.png">
+            <div class="basic">
+                <h1>Katerina of Albrand</h1>
+                <ul class="basic_sub">
+                    <li>Spymaster</li>
+                    <li>Westerstede</li>
+                    <li>Nohr</li>
+                </ul>
+                <p class="basic_sub">The Second Vasco</p>
+            </div>
+        </div>
+        <div class="bio">
+            <div class="de">
+                <h2>Biography</h2>
+                <p>A woman loved by the people, respected by her allies, feared and despised by her foes. Katerina of Albrand was a woman of many faces. Much of history will remember her as simply the first consort of King Garon, but one day, the truth will come to light of her true character as the woman who made Garon’s ascension to the throne possible, his eyes and ears.</p>
+                <p>Born a frail, sickly girl unqualified to continue the Albrand tradition of cavalier training and little affinity for magic, Katerina grew up alongside her future husband Garon and fellow consort Theresa of Durand. Of the trio, Garon was the strongest, Theresa was the magically gifted, while Katerina had nothing but a name that would guarantee her marriage to the House of Lorenzen, as well as a keen mind that was often overlooked by most, except for Sir Vasco Belmonte, the king’s spymaster and royal court painter.</p>
+                <p>Vasco would enlist Katerina’s help to intercept letters from her godfather Oswald of Lorenzen and an unknown party to uncover a plan to assassinate the king. When Katerina took a step further and additionally identified the unknown party before him, Vasco was impressed by her raw potential and offered to teach her his line of work after they put Oswald in prison. To better seal the deal, he promised her that she could become a more powerful asset to her friends.</p>
+                <p>Under the royal spymaster’s tutelage, Katerina became a formidable woman not in the realm of the sword and tome, but the realm of information and management. Misleading others with a gentle demeanor, a generous reputation, and exaggerated displays of illness, Katerina was skilled at hiding her activities from unwanted company, her role in Vasco’s network known only to the royal family and her most trusted friends. After Vasco died failing to prevent King Rembrandt’s murder at the hands of Oswald, who broke out of prison, Katerina took over Vasco’s role as new royal spymaster.</p>
+                <p>Operating under her deceased mentor’s name, Katerina would track down her godfather’s whereabouts and unify the noble houses under the newly crowned King Hugo, but the elder brother would die from an ambush organized by her uncle, leaving Prince Garon to take the reins. Determined not to fail again, Katerina assisted Garon and Theresa in wiping out Oswald’s faction for good. When her husband was finally crowned king, Katerina vowed to continue being his spymaster and even had plans for a successor in case she died early.</p>
+                <p>In a profession that required secrecy and subterfuge, Katerina had to maintain careful distance with strangers while staying close to her friends. Yet for all of her brilliance, Katerina often overestimated the tolerance of her close ones. When Garon was under pressure to take a wife to assure his capacity as a ruler and a family man, Katerina told him to marry her first to settle any possible animosity from the Albrands, who had been split because of Oswald’s influence. This was a breach in her promise to both Garon and Theresa that they would be married together. Theresa was uneasy with the compromise and questioned whether Katerina could have made a joint marriage possible. The consort refused to change her stance on the issue, explaining her judgement was the only logical way, a response that would continue to plague the women’s friendship between each other and King Garon for years to come.</p>
+                <p>Katerina and Garon were at their happiest at each other’s side, but the consort’s days were numbered. The birth of twins affected her health detrimentally, and when illness caught up with her, Katerina was confined to her bed for a month longer than expected. The healers reassured her concerned husband that she would survive, but as the months grew by, she grew worse and worse, no longer able to cradle her own children in her arms. When she was pronounced dead, Garon felt like a part of him was lost forever. Nohr’s reconstruction would have to wait another thirty years.</p>
+                <p><a target="_blank" href="http://iasfuturekings.tumblr.com/post/147453409787">Read More for Design Notes</a></p>
+            </div>
+            <div class="de dkid">
+                <h2>Children</h2>
+                <div class="kid">
+                    <img class="icon" src="kid_xan.png">
+                    <div class="overlay"><p class="overlay_text">Xander</p></div>
+                </div>
+                <div class="kid">
+                    <img class="icon" src="kid_diantha.png">
+                    <div class="overlay"><p class="overlay_text">Diantha</p></div>
+                </div>
+                <div class="kid">
+                    <img class="icon" src="kid_Mars.png">
+                    <div class="overlay"><p class="overlay_text">Marius</p></div>
+                </div>
+            </div>
+            <div class="closebio">Close Bio</div>
+        </div>
+    </div>
+    </div>
+</body>
+</html>

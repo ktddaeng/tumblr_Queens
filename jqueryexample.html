@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <title>Title</title>
+    <style>
+        .submenu {
+            display: none;
+            margin-left:10px;
+            background-color:#fdd;
+        }
+    </style>
+    <script>
+        jQuery(document).ready(function($) {
+            $(".entry-content").hide('slow');
+            $(".entry-title").click(function() {
+                $(".entry-content").slideUp('slow');
+                $(this).parent().children(".entry-content").slideToggle(500);
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="entry-post">
+
+        <div class="entry-title">Post Title 1</div>
+
+        <div class="entry-content">
+            <div class="kid">Xander</div>
+            <div class="kid">Diantha</div>
+            <div class="kid">Marius</div>
+        </div>
+    </div>
+
+    <div class="entry-title">Post Title 2</div>
+
+        <div class="entry-content">Lorem Ipsum...</div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nohrian Family Tree</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+
+    <!--STYLES-->
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Cinzel|Lato:300,400');
+        /*VARIABLES - CHANGE COLORS HERE*/
+        :root{  /*Silver Default*/
+            --bg-color: #fff;
+            --text-color: #525564;
+            --overlay-color: #fff;
+            --link-color: #94a0b4;
+            --link-color-hover: #525564;
+            --hover-color-1: #94a0b4;
+        }
+
+        #credit {
+            position: fixed;
+            display: block;
+            bottom: 10px; right: 10px;
+            z-index: 3;
+        }
+        #credit .cc span{
+            display: none;
+        }
+        #credit .cc:hover span{
+            opacity: 1;
+            display: block;
+            position: absolute;
+            right: 15px; bottom: 10px;
+            width: 90px;
+            white-space: nowrap;
+            text-align: center;
+
+            background-color: var(--text-color);
+            color: var(--overlay-color);
+            font-size: x-small;
+            text-transform: uppercase;
+            z-index: 100;
+        }
+
+        html{
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        body {
+            font-family: "Lato", sans-serif; font-weight: 300;
+            overflow-y: scroll;
+            overflow-x: hidden;
+        }
+        h3{ font-family: "Lato", sans-serif; font-weight: 300; }
+        h1{
+            font-family: 'Cinzel', serif;
+            font-size: xx-large;
+            margin: 0;
+        }
+        h2{
+            font-family: 'Cinzel', serif;
+            font-size: large;
+            text-align: center;
+        }
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background-color: var(--link-color);
+            border: 4px solid transparent;
+            background-clip: content-box;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--link-color-hover);
+            border: 1px solid var(--link-color-hover);
+            -webkit-transition: width 1s;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--link-color);
+        }
+        a:hover{
+            color: var(--link-color-hover);
+            transition: 1s ease;
+        }
+        .titlebox{
+            text-align: center;
+            padding: 20px 0 20px 0;
+            border-bottom: 1px solid var(--text-color);
+        }
+
+        .lister {width: 600px; margin: 0 auto; }
+
+        .chara {
+            border-bottom: 1px solid var(--text-color);
+            width: 100%;
+        }
+
+        .desc {
+            height: 128px;
+            text-align: center;
+            padding: 15px;
+            position: relative;
+            transition: 1s ease;
+        }
+        .desc:hover {
+            color: var(--overlay-color);
+        }
+        .desc:after{
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            height: 100%; width: 100vw;
+            z-index: -1;
+            transition: 1s ease;
+        }
+        .desc:hover:after{
+            content: '';
+            background-color: var(--hover-color-1);
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            height: 100%; width: 100vw;
+            z-index: -1;
+        }
+        .icon {
+            border-radius: 50%;
+            max-height: 128px;
+            max-width: 128px;
+            vertical-align: middle;
+            float: left;
+            display: block;
+        }
+        .basic{
+            width: auto;
+            overflow: hidden;
+            margin: 5% 0 0 0;
+        }
+        .basic_sub{
+            margin: 0;
+            list-style: none;
+            text-transform: uppercase;
+        }
+        ul {padding: 0;}
+        ul li{ display: inline; white-space: nowrap; }
+        ul li:after { content: " \00b7"; margin: 0 10px 0 10px; }
+        ul li:last-child:after{ content: none; margin: 0; }
+
+        .bio{ width: 100%; }
+        .de { border-top: 1px solid var(--hover-color-1);}
+        .dkid { text-align: center;}
+        .kid {
+            width: 128px; height: 128px;
+            display: inline-block;
+            position: relative;
+            margin: 0 1% 10px 1%;
+        }
+        .overlay {
+            position: absolute;
+            top: 0; bottom: 0; left: 0; right: 0;
+            width: 128px; height: 128px;
+            line-height: 128px;
+            border-radius: 50%;
+            opacity: 0;
+            transition: .5s ease;
+            background-color: var(--hover-color-1);
+        }
+        .overlay_text {
+            color: var(--overlay-color);
+            display: inline-table;
+            vertical-align: middle;
+            line-height: 100%;
+            text-transform: uppercase;
+        }
+        .kid:hover .overlay{ opacity: 1;}
+
+        .closebio {
+            width: 100%;
+            text-align: center;
+            background-color: var(--hover-color-1);
+            color: var(--overlay-color);
+            text-transform: uppercase;
+            padding: 1%;
+            transition: .5s ease;
+        }
+        .closebio:hover {
+            background-color: var(--hover-color-1);
+            transition: .5s ease;
+        }
+    </style>
+
+    <!--SCRIPTS-->
+    <script>
+        jQuery(document).ready(function($){
+            $(".bio").slideUp('slow');
+            $(".desc").click(function(){
+                var isVisible = $(this).parent(".chara").children(".bio").is(":visible");
+                console.log(isVisible);
+
+                //https://stackoverflow.com/questions/16796225/hold-scroll-position-on-slidetoggle
+                var hold = this;
+                var topOfElement = $(hold).offset().top;
+                var topOfScroll = $(window).scrollTop();
+                var effectiveHeight = topOfElement - topOfScroll;
+
+                if (!isVisible){
+                    topOfElement = $(hold).offset().top;
+                    $(window).scrollTop(topOfElement - effectiveHeight);
+                    $(".bio").slideUp('slow');
+                    $(this).parent(".chara").children(".bio").slideToggle();
+                } else {
+                    $(this).parent(".chara").children(".bio").slideToggle();
+                }
+            });
+
+            $(".closebio").click(function(){
+                $(this).parent(".bio").slideUp('slow');
+            });
+        });
+    </script>
+</head>
+<body>
+
+<div class="titlebox">
+    <h1>The Queens of Quirinus</h1>
+    <p class="basic_sub">Those Who Commanded Fate</p>
+</div>
+
+<div class="lister">
+    <div class="chara">
+        <div class="desc">
+            <img class="icon" alt="katerina" src="images/ntc_katerina.png">
+            <div class="basic">
+                <h1>Katerina of Albrand</h1>
+                <ul class="basic_sub">
+                    <li>Spymaster</li>
+                    <li>Westerstede</li>
+                    <li>Silver Tongue</li>
+                </ul>
+                <p class="basic_sub">The Second Vasco</p>
+            </div>
+        </div>
+        <div class="bio">
+            <div class="de">
+                <h2>Biography</h2>
+                <p>A woman loved by the people, respected by her allies, feared and despised by her foes. Katerina of Albrand was a woman of many faces. Much of history will remember her as simply the first consort of King Garon, but one day, the truth will come to light of her true character as the woman who made Garon’s ascension to the throne possible, his eyes and ears.</p>
+                <p>Born a frail, sickly girl unqualified to continue the Albrand tradition of cavalier training and little affinity for magic, Katerina grew up alongside her future husband Garon and fellow consort Theresa of Durand. Of the trio, Garon was the strongest, Theresa was the magically gifted, while Katerina had nothing but a name that would guarantee her marriage to the House of Lorenzen, as well as a keen mind that was often overlooked by most, except for Sir Vasco Belmonte, the king’s spymaster and royal court painter.</p>
+                <p>Vasco would enlist Katerina’s help to intercept letters from her godfather Oswald of Lorenzen and an unknown party to uncover a plan to assassinate the king. When Katerina took a step further and additionally identified the unknown party before him, Vasco was impressed by her raw potential and offered to teach her his line of work after they put Oswald in prison. To better seal the deal, he promised her that she could become a more powerful asset to her friends.</p>
+                <p>Under the royal spymaster’s tutelage, Katerina became a formidable woman not in the realm of the sword and tome, but the realm of information and management. Misleading others with a gentle demeanor, a generous reputation, and exaggerated displays of illness, Katerina was skilled at hiding her activities from unwanted company, her role in Vasco’s network known only to the royal family and her most trusted friends. After Vasco died failing to prevent King Rembrandt’s murder at the hands of Oswald, who broke out of prison, Katerina took over Vasco’s role as new royal spymaster.</p>
+                <p>Operating under her deceased mentor’s name, Katerina would track down her godfather’s whereabouts and unify the noble houses under the newly crowned King Hugo, but the elder brother would die from an ambush organized by her uncle, leaving Prince Garon to take the reins. Determined not to fail again, Katerina assisted Garon and Theresa in wiping out Oswald’s faction for good. When her husband was finally crowned king, Katerina vowed to continue being his spymaster and even had plans for a successor in case she died early.</p>
+                <p>In a profession that required secrecy and subterfuge, Katerina had to maintain careful distance with strangers while staying close to her friends. Yet for all of her brilliance, Katerina often overestimated the tolerance of her close ones. When Garon was under pressure to take a wife to assure his capacity as a ruler and a family man, Katerina told him to marry her first to settle any possible animosity from the Albrands, who had been split because of Oswald’s influence. This was a breach in her promise to both Garon and Theresa that they would be married together. Theresa was uneasy with the compromise and questioned whether Katerina could have made a joint marriage possible. The consort refused to change her stance on the issue, explaining her judgement was the only logical way, a response that would continue to plague the women’s friendship between each other and King Garon for years to come.</p>
+                <p>Katerina and Garon were at their happiest at each other’s side, but the consort’s days were numbered. The birth of twins affected her health detrimentally, and when illness caught up with her, Katerina was confined to her bed for a month longer than expected. The healers reassured her concerned husband that she would survive, but as the months grew by, she grew worse and worse, no longer able to cradle her own children in her arms. When she was pronounced dead, Garon felt like a part of him was lost forever. Nohr’s reconstruction would have to wait another thirty years.</p>
+                <p><a target="_blank" href="http://archiveofourown.org/works/7536472/chapters/22045358#katerina">Read More for Design Notes</a></p>
+            </div>
+            <div class="de dkid">
+                <h2>Children</h2>
+                <div class="kid">
+                    <img class="icon" alt="xander" src="images/kid_xan.png">
+                    <div class="overlay"><p class="overlay_text">Xander</p></div>
+                </div>
+                <div class="kid">
+                    <img class="icon" alt="diantha" src="images/kid_diantha.png">
+                    <div class="overlay"><p class="overlay_text">Diantha</p></div>
+                </div>
+                <div class="kid">
+                    <img class="icon" alt="marius" src="images/kid_Mars.png">
+                    <div class="overlay"><p class="overlay_text">Marius</p></div>
+                </div>
+            </div>
+            <div class="closebio">Close Bio</div>
+        </div>
+    </div>
+    <div class="chara">
+        <div class="desc">
+            <img class="icon" alt="annaliese" src="images/ntc_annaliese.png">
+            <div class="basic">
+                <h1>Annaliese of Buelen</h1>
+                <ul class="basic_sub">
+                    <li>Sorcerer</li>
+                    <li>Morbank</li>
+                    <li>Recklessness</li>
+                </ul>
+                <p class="basic_sub">Death in Life</p>
+            </div>
+        </div>
+        <div class="bio">
+            <div class="de">
+                <h2>Biography</h2>
+                <p>As the sole child of a neglectful Roderick Buelen, Annaliese achieved her position in the mage’s temple through only her name. Many referred to her as a brat and pitied Prince Hugo of Lorenzen, her betrothed. Regardless of her behavior, Hugo treated her kindly and allowed to her to prove her mettle in battle, a respectful gesture that won her heart. However, their potential happiness could never be, for Hugo would be slain by his uncle, and his younger brother Garon would honor the family agreement by marrying Annaliese instead. Although she harbors resentment against her husband, she tried to make the best of situation.</p>
+                <p>Most of the time, Annaliese was often at odds with the other consorts who either suspected her of possible assassinations or didn’t see her as an equal on the battlefield. After Consort Katerina died unexpectedly, Annaliese worked to advance her dear son Jeremiah to the throne by taking advantage of Garon’s grief and eliminating Katerina’s children. While Xander and the twins were still young, she attempted to poison them, but was thwarted by Sir Gunther. Ronne, the new spymaster, followed the trail of evidence she carelessly left behind and alerted the Albrands, who retaliated in return.</p>
+                <p>Augustine of Albrand then arranged for Annaliese to be hexed with a wasting disease. The consort would first lose the ability to walk, then followed by the rest of her senses in a gradual, painful process that took years. Withered and helpless, Annaliese immediately fell out of favor with the king, the court, and the family. Only her cousins, Horatio and Irma of Buelen were willing to keep her alive, while her son Jeremiah was driven to avenge her.</p>
+                <p><a target="_blank" href="http://archiveofourown.org/works/7536472/chapters/22045358#annaliese">Read More for Design Notes</a></p>
+            </div>
+            <div class="de dkid">
+                <h2>Children</h2>
+                <div class="kid">
+                    <img class="icon" alt="jeremiah" src="images/kid_jeremiah.png">
+                    <div class="overlay"><p class="overlay_text">Jeremiah</p></div>
+                </div>
+            </div>
+            <div class="closebio">Close Bio</div>
+        </div>
+    </div>
+    <div class="chara">
+        <div class="desc">
+            <img class="icon" alt="theresa" src="images/ntc_theresa.png">
+            <div class="basic">
+                <h1>Theresa of Durand</h1>
+                <ul class="basic_sub">
+                    <li>Witch</li>
+                    <li>Fallmount</li>
+                    <li>Backstabber</li>
+                </ul>
+                <p class="basic_sub">The Witch of Fallmount</p>
+            </div>
+        </div>
+        <div class="bio">
+            <div class="de">
+                <h2>Biography</h2>
+                <p>Although Garon had several noblewomen as consorts, he did have those of commoner birth. The first of these women was a dancer from a traveling entertainment troupe who performed for the king when he was traveling in Nestra to settle a land dispute. Although only a mere entertainer, Leila would offer sound advice and gave Garon a new perspective in the way he handled his affairs. In Garon’s moments of loneliness brought on from his lingering grief of his kingdom’s turmoil, Leila kept him company every night out of concern for him, and together they appreciated the stars that littered the night sky. When he was about to depart, he asked Leila to come with him to the capital, to which she jumped at the opportunity.</p>
+                <p>Although many doubted her true nature in regards to Garon, Leila would prove time and time again that she had her king’s interests at heart. Her kindness won the hearts of the people and the supports of the Lovells, who respected her pacifist approach. She was exceedingly civil with the other consorts as well and wished not to fight them, but instead to befriend them. She introduced Garon to Seraphina of Minett, who would become her greatest friend in Windmire. She also earned the respect of Lady Gabrielle, who was also a close friend and consort of the king.</p>
+                <p>The birth of Damian brought great joy to not only Leila but also Garon himself. The two hoped that these happy times were a sign of a good future. Meanwhile, fellow consort Theresa of Durand couldn’t comprehend how the king would be so entranced by a mere commoner so far as to have a child. Even worse, she simmered in fury over how quickly Leila surpassed her in rank and respect, suddenly being hailed as the next “Katerina”. Years passed, and no longer could Theresa stand the cheerful smile on this simpleton’s face as she stood by the king as if she deserved that position.</p>
+                <p>One day, Ashley Holstein, the wife of Barnaby of Lovell, was found dead, and all evidence pointed to Leila. The entire kingdom was thrown into disbelief, but the evidence against her was too strong. Leila was then pronounced guilty of murder, despite Seraphina’s protests and Damian’s pleas. Unable to order her execution like Theresa wished, Garon ordered her to be sent to the borders of Nestra where she could live in exile. Realizing she would be forced to part with her beloved son, Leila requested one last moment with Damian, who refused to let go of her.</p>
+                <p>“We may be far apart,” she comforted to her weeping son. “But if you need think of me, look to the stars. Remember that we share the same sky, and that I will always be with you.”</p>
+                <p>A month later, the king received a report that Leila’s envoy was attacked by unknown assassins, with no survivors. Afterwards, King Garon put up the late consort’s portrait next to Katerina’s in his private study as yet another glaring reminder of all the wrongs he’s done to others.</p>
+                <p><a target="_blank" href="http://archiveofourown.org/works/7536472/chapters/22045358#theresa">Read More for Design Notes</a></p>
+            </div>
+            <div class="de dkid">
+                <h2>Children</h2>
+                <div class="kid">
+                    <img class="icon" alt="thomas" src="images/kid_tom.png">
+                    <div class="overlay"><p class="overlay_text">Thomas</p></div>
+                </div>
+                <div class="kid">
+                    <img class="icon" alt="liselotte" src="images/kid_liselotte.png">
+                    <div class="overlay"><p class="overlay_text">Liselotte</p></div>
+                </div>
+            </div>
+            <div class="closebio">Close Bio</div>
+        </div>
+    </div>
+    <div class="chara">
+        <div class="desc">
+            <img class="icon" alt="leila" src="images/ntc_leila.png">
+            <div class="basic">
+                <h1>Leila of Lorenzen</h1>
+                <ul class="basic_sub">
+                    <li>Dancer</li>
+                    <li>Nestra</li>
+                    <li>Sympathy</li>
+                </ul>
+                <p class="basic_sub">Beauty of the Desert</p>
+            </div>
+        </div>
+        <div class="bio">
+            <div class="de">
+                <h2>Biography</h2>
+                <p>Although Garon had several noblewomen as consorts, he did have those of commoner birth. The first of these women was a dancer from a traveling entertainment troupe who performed for the king when he was traveling in Nestra to settle a land dispute. Although only a mere entertainer, Leila would offer sound advice and gave Garon a new perspective in the way he handled his affairs. In Garon’s moments of loneliness brought on from his lingering grief of his kingdom’s turmoil, Leila kept him company every night out of concern for him, and together they appreciated the stars that littered the night sky. When he was about to depart, he asked Leila to come with him to the capital, to which she jumped at the opportunity.</p>
+                <p>Although many doubted her true nature in regards to Garon, Leila would prove time and time again that she had her king’s interests at heart. Her kindness won the hearts of the people and the supports of the Lovells, who respected her pacifist approach. She was exceedingly civil with the other consorts as well and wished not to fight them, but instead to befriend them. She introduced Garon to Seraphina of Minett, who would become her greatest friend in Windmire. She also earned the respect of Lady Gabrielle, who was also a close friend and consort of the king.</p>
+                <p>The birth of Damian brought great joy to not only Leila but also Garon himself. The two hoped that these happy times were a sign of a good future. Meanwhile, fellow consort Theresa of Durand couldn’t comprehend how the king would be so entranced by a mere commoner so far as to have a child. Even worse, she simmered in fury over how quickly Leila surpassed her in rank and respect, suddenly being hailed as the next “Katerina”. Years passed, and no longer could Theresa stand the cheerful smile on this simpleton’s face as she stood by the king as if she deserved that position.</p>
+                <p>One day, Ashley Holstein, the wife of Barnaby of Lovell, was found dead, and all evidence pointed to Leila. The entire kingdom was thrown into disbelief, but the evidence against her was too strong. Leila was then pronounced guilty of murder, despite Seraphina’s protests and Damian’s pleas. Unable to order her execution like Theresa wished, Garon ordered her to be sent to the borders of Nestra where she could live in exile. Realizing she would be forced to part with her beloved son, Leila requested one last moment with Damian, who refused to let go of her.</p>
+                <p>“We may be far apart,” she comforted to her weeping son. “But if you need think of me, look to the stars. Remember that we share the same sky, and that I will always be with you.”</p>
+                <p>A month later, the king received a report that Leila’s envoy was attacked by unknown assassins, with no survivors. Afterwards, King Garon put up the late consort’s portrait next to Katerina’s in his private study as yet another glaring reminder of all the wrongs he’s done to others.</p>
+                <p><a target="_blank" href="http://archiveofourown.org/works/7536472/chapters/22045358#leila">Read More for Design Notes</a></p>
+            </div>
+            <div class="de dkid">
+                <h2>Children</h2>
+                <div class="kid">
+                    <img class="icon" alt="damian" src="images/kid_dami.png">
+                    <div class="overlay"><p class="overlay_text">Damian</p></div>
+                </div>
+            </div>
+            <div class="closebio">Close Bio</div>
+        </div>
+    </div>
+    <div class="chara">
+        <div class="desc">
+            <img class="icon" alt="gabrielle" src="images/ntc_gabby.png">
+            <div class="basic">
+                <h1>Lady Gabrielle</h1>
+                <ul class="basic_sub">
+                    <li>General</li>
+                    <li>Fallmount</li>
+                    <li>Black Knight</li>
+                </ul>
+                <p class="basic_sub">Champion of Fallmount</p>
+            </div>
+        </div>
+        <div class="bio">
+            <div class="de">
+                <h2>Biography</h2>
+                <p>To show their supposedly unending friendship, Consort Theresa allowed her friend Consort Katerina to choose from her roster of notable warriors and knights as a retainer. The spymaster chose a statuesque, military woman named Gabrielle, a general hailing from a knight company serving the Durands. Although her loyalty was with the Durands, the governing family of her place of origin, Gabrielle followed Katerina without question and came to adore her liege as well as her future husband King Garon.</p>
+                <p>After Katerina’s death, Garon sought comfort in Gabrielle as a friend, most especially after his fallout with Theresa. Her loyalty now changed, she then married the king to stay by his side like Katerina would have wished for her and to permanently cut ties of her honorary position with the Durands. Enraged, Theresa poisoned her food thoroughly one night, hoping the general would die, but Gabrielle survived the attack but was unable to conceive any children. Thankfully, her husband did not think less of her for this and asked that she continue to remain by his side as a friend and mentor to some of this children. She would be one of Xander and Marius’ many teachers in royal lancefaire and introduced Damian to the art as well.</p>
+                <p>Gabrielle was one of the kindest consorts despite her rugged looks, and often tried to make the other consorts feel at home. She assigned herself as protector to many of the consorts who hailed from no noble family, although her success varied. Through her good will, she fostered many friendships in the court wherever she could, although overall, she remained neutral in the conflict between Seraphina and Theresa. While she no longer had faith in Theresa as much, she believed that Seraphina would change for the better, much how she believed in the good of the other consorts to serve the king and their country.</p>
+                <p>Later when the Durands were accused of treachery, Gabrielle would follow her husband’s orders to execute all the Durands. Over the week of mass killing and hunting, Gabrielle and Seraphina managed to understand each other more than they ever could in the halls of Krakenburg. Their newfound friendship was cut short when the general protected Seraphina from one of Theresa’s particularly deadlier spells while in pursuit. Gabrielle’s memory is immortalized in the Castle Krakenburg by a statue of her likeness.</p>
+                <p><a target="_blank" href="http://archiveofourown.org/works/7536472/chapters/22045358#gabrielle">Read More for Design Notes</a></p>
+            </div>
+            <div class="closebio">Close Bio</div>
+        </div>
+    </div>
+    <div class="chara">
+        <div class="desc">
+            <img class="icon" alt="irma" src="images/ntc_irma.png">
+            <div class="basic">
+                <h1>Irma of Buelen</h1>
+                <ul class="basic_sub">
+                    <li>Bow Knight</li>
+                    <li>Morbank</li>
+                    <li>Slash & Burn</li>
+                </ul>
+                <p class="basic_sub">The Arrow That Ignited a War</p>
+            </div>
+        </div>
+        <div class="bio">
+            <div class="de">
+                <h2>Biography</h2>
+                <p>After the fall of Nohrian King Rembrandt by his brother, his sons enlisted the support of House Buelen to quell their uncle Oswald’s uprising. Lady Irma of Buelen, the daughter of the famed general and sorceror Fedele of Buelen, eagerly agreed to fight for then Prince Garon, if not for the sake of honoring her cousin Annaliese’s betrothal to King Hugo. Her pragmatism helped Garon defeat Oswald and ascend to the throne, earning her honors and a place in House Lorenzen as the new king’s consort.</p>
+                <p>Like many consorts, Irma was eager to use her position to influence kingdom affaris to benefit her house, but while her fellow consorts Seraphina and Theresa were, Irma took a more reserved approach to consolidating power, representing the more central party in matters pertaining to the court. However, when Theresa later proved to pose a great threat to the balance of power, Irma favored Seraphina and also pushed for the king to issue the decree leading to the Massacre of Durand.</p>
+                <p>Irma grew especially concerned about the prosperity of her nation, and like many of her fellow colleagues, she believed that securing some of Hoshido’s plentiful land would help them. The king had long agreed that trade should be opened between Nohr and their eastern neighbor, but for many years, such talks were turned down. Irma realized a lawful approach would succeed, and thus turned to other means.</p>
+                <p>Upon learning that House Pohl was sponsoring the booming smuggling ring and migrant work that operated the Hoshidan-Nohr border. Irma used this ring as an attempt to test how the Hoshidans would react to these developments. Fortune smiled down upon her when she spotted a pegasus flying above her. It wasn’t just any pegasus, but that of the Hoshidan Queen Ikona, who had been called with her fellow Sky Knights to perform border inspections. After some thought, Irma drew back her bow and released. Her arrow struck the Hoshidan queen directly in the heart, and sent east lands into a state of shock.</p>
+                <p>Upon provocation, King Sumeragi declared war on the Kingdom of Nohr, but the Hoshidans, who haven’t seen war in decades, were not prepared for Irma’s cunning. Using the confusion along the border, Irma led troops into the Hoshidan Plains and staked claim on Hoshidan territory as that of her own nation’s. She counted on the inexperience of the Hoshidans, who have never once had conflict for half a century, unlike the Nohrians, who had just emerged from a civil war. Unable to curb her independent actions, the king and the rest of his war council was forced to join her under the grounds that they must protect their own.</p>
+                <p>During the second phase of the Hoshidan-Nohr conflict, Consort Irma was slain by the Hoshidan Kinshi Knight Reina, who had sought to avenge her teacher and queen. Irma’s death was a huge blow for the Nohrians, for she had been a guiding figure in the war council. For a while, Nohr would keep a steady hold on their portion of the Hoshidan plains, but later the Hoshidans would drive Nohr back over the border. While Irma’s attempted invasion may have ultimately failed, her actions sowed the seeds of motivation for Nohr to attempt conquest of the east lands in the near future.</p>
+                <p><a target="_blank" href="http://archiveofourown.org/works/7536472/chapters/22045358#irma">Read More for Design Notes</a></p>
+            </div>
+            <div class="de dkid">
+                <h2>Children</h2>
+                <div class="kid">
+                    <img class="icon" alt="roswitha" src="images/kid_rose.png">
+                    <div class="overlay"><p class="overlay_text">Roswitha</p></div>
+                </div>
+            </div>
+            <div class="closebio">Close Bio</div>
+        </div>
+    </div>
+    <div class="chara">
+        <div class="desc">
+            <img class="icon" alt="seraphina" src="images/ntc_seraphina.png">
+            <div class="basic">
+                <h1>Seraphina of Minett</h1>
+                <ul class="basic_sub">
+                    <li>Sorcerer</li>
+                    <li>Minett</li>
+                    <li>Retribution</li>
+                </ul>
+                <p class="basic_sub">Ambition Unrivaled</p>
+            </div>
+        </div>
+        <div class="bio">
+            <div class="de">
+                <h2>Biography</h2>
+                <p>A star was made in the Nestra’s prized opera house, garnering the attention of the visiting King of Nohr. Impressed by her sharp tongue and keen intellect, just like his late wife Katerina, Garon invited the woman to his court at Lady Leila’s request. Seraphina appreciated the favors she received from the king, but she sought to further her station in life than just a mere entertainer from a foreign land. She took advantage of her growing reputation as Garon’s new favorite to manipulate his subjects to bend in her favor. In due time, she was made an official consort of the king and soon gave birth to Princess Camilla.</p>
+                <p>While Seraphina thrived in the Nohrian royal court, her growing popularity could no longer be ignored by Theresa of Durand. Feeling that the younger consort was too full of herself, Theresa attempted sabotage through any means. Eventually, the Witch of Fallmount succeeded in poisoning Seraphina, who survived but could no longer sing for her king, causing her to fall out of favor in the Nohrian high society. Humiliated, Seraphina marked Theresa as her lifelong enemy and planned a long, grueling campaign of vengeance.</p>
+                <p>Desiring to continue making herself useful to the king, Seraphina became a master Sorcerer in a few years, even holding a relatively high position in the mages’ temples as a researcher. She used her connections to improve her status and reputation by slowly having members of her family installed in the upper echelons of Nohrian government. With Albrand support, her newly established noble House of Minett skyrocketed in popularity, so much that the king was so willing to partition a good portion of Fallmount to the Minetts, as she requested. Although she met violent opposition from Theresa and the Durands, Seraphina continued her relentless assault, finally culminating in the Massacre of Durand, an event brought by fate and calculation on her part.</p>
+                <p>Although she had accomplished her revenge, she lost a great deal of her own family, in mind and body. Her beloved sister, cousins, and friends had been lost to the violence. Her daughter and surrogate son, Camilla and Damian, eventually grew disgusted with her lack of restraint and went to live as their own person. The rest of her surviving family grew distant, burdened by their guilt for taking part in the horrific massacre. Her husband, the king, had long given up on spending his affections her.</p>
+                <p>With little to turn back to, Seraphina lost herself in her work as a sorcerer. She quickly grew past her disappointment, comforted by the fact that she secured the future of her surviving loved ones, even if she was no longer a part of their lives. Seraphina later succumbed to illness from exposure to the dangerous chemicals and experiments she worked on, and passed away in her office at a mage’s temple, alone. Despite their faltering relationship, the royal family made sure she had a respectable funeral and kept her portrait on display in Castle Krakenburg.</p>
+                <p><a target="_blank" href="http://archiveofourown.org/works/7536472/chapters/22045358#seraphina">Read More for Design Notes</a></p>
+            </div>
+            <div class="de dkid">
+                <h2>Children</h2>
+                <div class="kid">
+                    <img class="icon" alt="camilla" src="images/kid_milly.png">
+                    <div class="overlay"><p class="overlay_text">Camilla</p></div>
+                </div>
+            </div>
+            <div class="closebio">Close Bio</div>
+        </div>
+    </div>
+    <div class="chara">
+        <div class="desc">
+            <img class="icon" alt="magda" src="images/ntc_magda.png">
+            <div class="basic">
+                <h1>Lady Magdalena</h1>
+                <ul class="basic_sub">
+                    <li>Troubadour</li>
+                    <li>Durand</li>
+                    <li>Tristesse</li>
+                </ul>
+                <p class="basic_sub">Love That Cannot Be Returned</p>
+            </div>
+        </div>
+        <div class="bio">
+            <div class="de">
+                <h2>Biography</h2>
+                <p>The bloody Massacre of Durand was a culmination of the revealed collaboration between the noble family and Hoshidans, but the event that sparked investigation was the attempted murder of the Crown Prince Xander by the Consort Magdalena of Durand. Today, Magdalena is a popular subject of tragic plays and dramas, well known for the associated themes of unrequited love and foolish hope.</p>
+                <p>The illegitimate daughter of Paulino of Durand and an unnamed commoner woman, Magda and her sister were welcomed to the Durand household as servants under the condition that they keep silent of their lineage. While Paulino remained the head of the family, the sisters were treated fairly, but after his passing, they were subject to Saverio’s cruelty. Hoping to provide a better means of living for herself and her sister, Magda agreed to assist her stepsister Theresa of Durand in her question of political dominance by seducing the king of Nohr.</p>
+                <p>Once she was made a consort, Magda’s sister was taken in by the mage’s temple as promised, while Magda continued to stay by her stepsister’s side. Although she was grateful to the king’s kindness, the consort had her eyes set on another: the crown prince himself. Unfortunately, her subtle acts of favor to Xander had gone unnoticed by the target of her affections, but not to Theresa.</p>
+                <p>Theresa then blackmailed Magda into leading the crown prince to a secluded quarter of the Esterlynian Woods, where a hired mercenary lay in wait. For added effect, Magda was persuaded to take her own life to cover up her death and the prince’s as a lovers’ suicide. However, Magda’s ardent love and lingering wishes to not leave her younger sister alone did not cloud her judgment as Theresa had thought, and she saved Xander from the fatal blow.</p>
+                <p>Upon failure, Magda’s stepsister revealed the details of her love for the prince to the court, sparking a whirlwind of rumors. The disheartened king was ready to sentence Magda to death for playing a part in the murder attempt, but Crown Prince Xander requested to spare her from punishment since she had warned him and exprsesed regret. Despite the heightened controversy, Magda was sentenced to house arrest in a secluded part of Castle Krakenburg. Her younger sister was turned away many times by the royal family, and the two sisters were forever separated then. In their last meeting, Prince Xander asked that Magda would use this time to let go of her infatuation for him, since he did not return her feelings.</p>
+                <p>Yet distance only made her heart grow stronger, and Magda collaborated with her sister’s greatest enemy, Lady Seraphina of Minett, to bring down her traitorous stepsister. Seraphina promised Magda protection from Theresa another chance to see Prince Xander and her sister once more. Her information proved vital to uncovering House Durand’s traitorous deeds and set the stage for the bloody Massacre of Durand. However, she was not spared from King Garon’s sentence, and was displayed among her kin at the gates of Fort Dragonfall.</p>
+                <p><a target="_blank" href="http://archiveofourown.org/works/7536472/chapters/22045358#magda">Read More for Design Notes</a></p>
+            </div>
+            <div class="closebio">Close Bio</div>
+        </div>
+    </div>
+    <div class="chara">
+        <div class="desc">
+            <img class="icon" alt="danica" src="images/ntc_danica.png">
+            <div class="basic">
+                <h1>Lady Danica</h1>
+                <ul class="basic_sub">
+                    <li>Troubadour</li>
+                    <li>Undocumented</li>
+                    <li>Ingénue</li>
+                </ul>
+                <p class="basic_sub">The Forgotten Princess</p>
+            </div>
+        </div>
+        <div class="bio">
+            <div class="de">
+                <h2>Biography</h2>
+                <p>Long ago, there was a tiny, isolated kingdom that lay beyond the sands and the Forests of the Forlorn. The king of this land sent his youngest daughter to King Garon, who accepted Danica and installed her into the royal court as a new consort to honor an thousand year old agreement. A month after her departure, the faraway kingdom was caught in a devastating plague that wiped out an entire population, or so she was told.</p>
+                <p>Completely unprepared for what awaited her but unwilling to wallow in her grief, Danica stood out like a sore thumb among the other, more elegant consorts.Upon her arrival in the court, she was greeted by Theresa of Durand, a fellow consort and a prominent healer. Theresa warned her that the other mistresses may not be as welcoming and offered to form a mutual alliance. Shortly after, Danica was named an honorary member of the House of Durand, granting her protection under the Durand family name.</p>
+                <p>While not blessed with magic ability or combat sense, Danica had a gift for stories, many of which charmed the king. She declared that she was the only surviving member of her kingdom and therefore possessed wealth of knowledge, culture, and history that could never be uncovered again. Intrigued by her claims, King Garon allowed her to work as a scribe and document all her knowledge into a series of books that would be the only remaining testament to her kingdom’s existence.</p>
+                <p>At first the king wished to humor her, but when he visited her regularly, he took interest in the knowledge she held and returned to the dusty library more regularly, eager to hear more enchanting tales and stories he had never even heard of. From fascination came respect, and from respect came love. Their relationship brought about the birth of a child, whom she named after one of her ancestors. Danica was close to finishing her countless leaflets of historical records, but she didn’t fear that her work would be finished and instead took comfort in the fact that her position was secured by the existence of her child. That is, until she found their lifeless body in the cradle, finger marks etched into their neck.</p>
+                <p>Theresa comforted the young, bereft mother and suggested an idea. If she could kill Princess Camilla’s mother, Lady Seraphina, perhaps she truly secure her position and have her sweet revenge. She gave Danica instructions for a poison to slip into the other consort’s drink at a feast and tell no one of their conversation. The younger consort eagerly accepted the request, but little did she know that Seraphina was never the intended victim to begin with.</p>
+                <p>The poor princess was caught in the act, while Theresa, the real mastermind, thoroughly covered up her involvement with the younger consort. Danica was sentenced to die the way she intended for Seraphina: a single goblet of concentrated poison before the entire nation. In her last moments, she clawed at the guards restraining her and shouted curses at Theresa, who watched the proceedings with cold, calculating eyes. However, her words were too garbled to comprehend. The only memory of her lies in the books that came from the stories that spilled from her tongue.</p>
+                <p><a target="_blank" href="http://archiveofourown.org/works/7536472/chapters/22045358#danica">Read More for Design Notes</a></p>
+            </div>
+            <div class="de dkid">
+                <h2>Children</h2>
+                <div class="kid">
+                    <img class="icon" alt="mila" src="">
+                    <div class="overlay"><p class="overlay_text">Mila</p></div>
+                </div>
+            </div>
+            <div class="closebio">Close Bio</div>
+        </div>
+    </div>
+    <div class="chara">
+        <div class="desc">
+            <img class="icon" alt="arete" src="images/ntc_arete.png">
+            <div class="basic">
+                <h1>Lady Arete</h1>
+                <ul class="basic_sub">
+                    <li>Songstress</li>
+                    <li>Valla</li>
+                    <li>Prudentia</li>
+                </ul>
+                <p class="basic_sub">The Atoner Queen</p>
+            </div>
+        </div>
+        <div class="bio">
+            <div class="de">
+                <h2>Biography</h2>
+                <p>[Under Construction]</p>
+                <p><a target="_blank" href="http://archiveofourown.org/works/7536472/chapters/22045358#danica">Read More for Design Notes</a></p>
+            </div>
+            <div class="de dkid">
+                <h2>Children</h2>
+                <div class="kid">
+                    <img class="icon" alt="azura" src="images/kid_azura.png">
+                    <div class="overlay"><p class="overlay_text">Azura</p></div>
+                </div>
+            </div>
+            <div class="closebio">Close Bio</div>
+        </div>
+    </div>
+    <div class="chara">
+        <div class="desc">
+            <img class="icon" alt="marianne" src="images/ntc_marianne.png">
+            <div class="basic">
+                <h1>Lady Marianne</h1>
+                <ul class="basic_sub">
+                    <li>Sorcerer</li>
+                    <li>Morbank</li>
+                    <li>Checkmate</li>
+                </ul>
+                <p class="basic_sub">Woman of Progress</p>
+            </div>
+        </div>
+        <div class="bio">
+            <div class="de">
+                <h2>Biography</h2>
+                <p>An elderly mage traveling through the Morbank countryside stayed in a small village along the road to resupply her wares. There, she met little Marianne, who possessed a gift for magic after an incident of mixing up her school primers with the old woman’s tome. After learning that the girl had no parents and that her aunt and uncle were more than happy to have one less mouth to feed, the elderly mage offered the girl a world beyond the confines of her village, and they set out together to the mage’s temple.</p>
+                <p>Marianne proved to be a studious apprentice to the woman who brought her to the temple. Although she was disciplined in magic, she later found her calling in research and development, which brought her great success within the magic community. The mage’s success in her early experiments earned her title of master sorceress at the ripe age of fifteen. On one occasion, Marianne impressed the king after answering his challenge to find a way to produce more tomes from a single pound of topaz with a new and improved refinery process that was well received throughout the nation.</p>
+                <p>Now that she had the king’s favor, Marianne asked for his support so she could pursue her lifelong dream: to bring back some of the experiments of the Memorandum of N for the benefit of Nohr. Interested in the potential of these experiments, King Garon agreed, and named her head of the project and offered some of his skilled sorcerers, Seraphina of Minett and Iago, as advisers. The three worked amicably together, and brought about the creation of the Faceless, humanoid, hulking creatures who only knew to blindly obey and destroy. Marianne was hesitant to agree with her two fellow leaders on the military potential of these monsters, but she conceded and focused on the combative aspects of the Faceless. On Seraphina’s urging, Marianne requested the king to name her consort to help bolster the Minetts’ growing dominance in the court, a trivial matter, but adding an extra title to her name could be useful in the long run.</p>
+                <p>Her son Leo was born out of necessity for the consort to secure her position as a consort. At first, she didn’t think much of her own child and was focused solely on her own research, fully expecting Leo to be raised by one of Seraphina’s suggested wet nurses and be tutored by her good friend Horatio. Her opinion changed when she brought her son proved to be compatible with Brynhildr, one of Nohr’s most sacred tomes. Fascinated by her son’s potential, Marianne asked his reluctant mentor to train him to his limits, so she could see the full extent of Leo’s magic capacity. Eventually the boy snapped and cut himself completely from his mother, to which she responded with indifference, just as she would regard a failed experiment.</p>
+                <p>Marianne would disappear from Windmire under mysterious circumstances. She was still enjoying her success after her further improvements on  her Faceless creations until her benefactor’s death. With Seraphina gone and Nohr’s recent loss to Hoshido, Marianne had no reason to stay, and she was gone one month later, along with the Memorandum of N. The magic community was tossed into disarray, believing her to be dead like the first princess Diantha, but Leo could not shed a single tear over the loss.</p>
+                <p><a target="_blank" href="http://archiveofourown.org/works/7536472/chapters/22045358#marianne">Read More for Design Notes</a></p>
+            </div>
+            <div class="de dkid">
+                <h2>Children</h2>
+                <div class="kid">
+                    <img class="icon" alt="leo" src="images/kid_leo.png">
+                    <div class="overlay"><p class="overlay_text">Leo</p></div>
+                </div>
+                <div class="kid">
+                    <img class="icon" alt="forrest" src="images/kid_forrest.png">
+                    <div class="overlay"><p class="overlay_text">Forrest</p></div>
+                </div>
+            </div>
+            <div class="closebio">Close Bio</div>
+        </div>
+    </div>
+    <div class="chara">
+        <div class="desc">
+            <img class="icon" alt="eirene" src="images/ntc_eirene.png">
+            <div class="basic">
+                <h1>Mikoto Yamato</h1>
+                <ul class="basic_sub">
+                    <li>War Priestess</li>
+                    <li>Morbank</li>
+                    <li>Queen's Mercy</li>
+                </ul>
+                <p class="basic_sub">Duty to Child and Kingdom</p>
+            </div>
+        </div>
+        <div class="bio">
+            <div class="de">
+                <h2>Biography</h2>
+                <p>[Under Construction]</p>
+                <p><a target="_blank" href="http://archiveofourown.org/works/7536472/chapters/22045358#yvonne">Read More for Design Notes</a></p>
+            </div>
+            <div class="de dkid">
+                <h2>Children</h2>
+                <div class="kid">
+                    <img class="icon" alt="anri" src="images/kid_anri.png">
+                    <div class="overlay"><p class="overlay_text">Anri</p></div>
+                </div>
+            </div>
+            <div class="closebio">Close Bio</div>
+        </div>
+    </div>
+    <div class="chara">
+        <div class="desc">
+            <img class="icon" alt="yvonne" src="images/ntc_yvonne.png">
+            <div class="basic">
+                <h1>Lady Yvonne</h1>
+                <ul class="basic_sub">
+                    <li>Strategist</li>
+                    <li>Morbank</li>
+                    <li>Bleeding Heart</li>
+                </ul>
+                <p class="basic_sub">Youth and Peace</p>
+            </div>
+        </div>
+        <div class="bio">
+            <div class="de">
+                <h2>Biography</h2>
+                <p>After Arete’s death, Garon was encouraged to continue taking more consorts, but the king declared he would only take one more. He left the choosing to his consort Gabrielle, one of the few whom he trusted. On the way to Esterlyn on his request, Gabrielle was severely wounded by a group of assassins sent by Theresa herself and would have died had she not been rescued by a village girl. During her recovery, Gabrielle noted that her savior, Yvonne, was rather gifted with healing rods and was quite particularly beautiful and charming for someone of her station, and the two became good acquaintances. Fate turned for the worse when Theresa ordered the village to be burned, and the knight had no choice but to take Yvonne with her. The destruction of her village left a grim reminder for the young lady of Theresa’s ruthlessness.</p>
+                <p>Once they arrived at the province, Yvonne assisted Gabrielle in the task of finding a suitable bride for her king, but to no avail. The war with Hoshida had only just begun, and Gabrielle was expected to take part in the fighting soon. She had no time to search through all the land, so instead she asked Yvonne if she wanted the role. When met with approval, Gabrielle enlisted the help of her stepdaughter Princess Diantha and her friend Claudia of Lovell with training the woman for court life. Diantha was especially excited by her father’s marriage prospects, believing that Yvonne would be the one to lighten up her father’s spirits after the turbulent years that had changed him after her own mother’s death.</p>
+                <p>Yvonne’s debut in the royal court did not go as smoothly as planned, for she was intimidated by the consort Seraphina into joining her side in the ongoing conflict among the concubines. Garon himself was seemingly uncooperative about their marriage, but Yvonne slowly became fully aware of his desire to bring about happiness to his struggling kingdom and his broken family. The King’s earnestness to make her feel like less of a poor substitute for the previous wives moved the newly wedded consort deeply and motivated her to be the supportive wife that Diantha encouraged her to be. Yvonne would be one of the last people to truly see Garon for who he was before the summit in Cheve from which he would return a different person. As for her relationship with her fellow consorts, Gabrielle remained a good friend till death, and Seraphina served as a wise mentor of sorts, although her opinion of the latter changed after the Massacre of Durand.</p>
+                <p>While Irma and Seraphina were more interested in war and dominance after the end of the blood feud, Yvonne established herself as one of the finest royal healers in the kingdom. Fully invested in fulfilling her husband’s dream of improving the conditions of Nohr, she engaged in much humanitarian work, frequenting the impoverished areas of the capital and helping the injured in battle. The consort was so occupied by her work that she didn’t ever seem to have time for her own daughter, Elise, whom she left in care of the girl’s wetnurse Cassita and later her surviving stepchildren. After Nohr’s devastating loss to Hoshido, Yvonne’s contributions and unyielding diligence became an important factor to keeping the national spirit alive and well to the present day.</p>
+                <p>Ever since seeing her husband grow weaker and her friends disappearing one by one, Yvonne worked harder and harder until one day, she collapsed while treating a patient. The consort had caught illness during her travels and had not notified anyone in favor of work. For the first time in years, her daughter came to see her in her deathbed. Elise had known that her mother was a busy woman and had done as little as possible to trouble her, so the young princess visited in the hopes of hearing some form of praise or at least one final conversation. To Elise’s disappointment, Yvonne had become blind from her illness and called for only her husband in her last moments. The kingdom mourned the loss of Garon’s last consort, while Elise and her royal siblings would continue Yvonne’s work to bring peace to their kingdom.</p>
+                <p><a target="_blank" href="http://archiveofourown.org/works/7536472/chapters/22045358#yvonne">Read More for Design Notes</a></p>
+            </div>
+            <div class="de dkid">
+                <h2>Children</h2>
+                <div class="kid">
+                    <img class="icon" alt="elise" src="images/kid_elise.png">
+                    <div class="overlay"><p class="overlay_text">Elise</p></div>
+                </div>
+            </div>
+            <div class="closebio">Close Bio</div>
+        </div>
+    </div>
+    <div class="chara">
+        <div class="desc">
+            <img class="icon" alt="ikona" src="images/ntc_ikona.png">
+            <div class="basic">
+                <h1>Ikona Yamato</h1>
+                <ul class="basic_sub">
+                    <li>Falcon Knight</li>
+                    <li>Amachi</li>
+                    <li>War Cry</li>
+                </ul>
+                <p class="basic_sub">Self-Defined Worth</p>
+            </div>
+        </div>
+        <div class="bio">
+            <div class="de">
+                <h2>Biography</h2>
+                <p>&ldquo;There lives a great threat just beyond those mountains,&rdquo; her father told Ikona and her brother as they flew over their lush green rice fields, &ldquo;If they do come, they&rsquo;ll strike us first, so we must prepare for that moment.&rdquo;</p>
+                <p>To live in the Amachi domain was to understand danger, a lesson the two children knew all too well when their father lost his life to a mercenary&rsquo;s axe. The threat of the men from the west lands was truly real, she realized. And so, Ikona resolved herself to train hard and long for the next time such a catastrophe could happen. While she was busy learning to be a suitable bride for the high prince to whom she was engaged to, she spent the late hours of the night practicing swings with a wooden naginata.</p>
+                <p>&ldquo;This won&rsquo;t do,&rdquo; her mother disapproved when she said she wanted to join the Sky Knight Corps with her brother. &ldquo;You are an Amachi, and a prince&rsquo;s bride. Know your duty.&rdquo;</p>
+                <p>&ldquo;Then I will learn the blade and the brush,&rdquo; Ikona declared. &ldquo;An Amachi strives for excellence.&rdquo;</p>
+                <p>While her mother doubted her capabilities, her brother Hisashi swelled with pride and gifted her one of his prized naginata.</p>
+                <p>&ldquo;Ignore those words, sister,&rdquo; he said. &ldquo;You can be strong in whichever way she chooses. If he rejects a woman as diligent as you, then Father would have chosen wrongly.&rdquo;</p>
+                <p>The two climbed the ranks of the Sky Knight Corps together, and Ikona returned home regularly to complete her other duties. She gained much support from her fellow Sky Knights and was known for her flawless execution, perhaps even surpassing her brother Hisashi. Ikona was a high ranked officer by the time she formally met her future husband. Her mother&rsquo;s words still echoed in her mind as she walked across the throne room to meet Sumeragi&rsquo;s eye. She endured the prince&rsquo;s long gaze and caught the twitch in the corner of his mouth at the sight of her weathered hands. She expected this, and fought to keep her composure.</p>
+                <p>"I chose to be strong in this way,&rdquo; she answered his unspoken question, fully expecting a harsh rebuttal, but none came.</p>
+                <p>While many others in the court called for the high prince to annul their engagement, Prince Sumeragi refused, and welcomed her to Shirasagi Castle. When he let her stay with him, many called for her resignation from the Sky Knight Corps, and once again he refused to placate their demands. In the capital of Shirasagi, they lived side by side in a space where they could understand and come to tolerate each other. Sumeragi in her eyes had transformed from a boy who she only knew by name and station into a man she could trust and confide in. The two were finally wed on a cool summer&rsquo;s day, and their first two children, Ryoma and Hinoka, were born not long after.</p>
+                <p>But an unexpected stranger was brought to the royal court. In search of a way to cure his aging father&rsquo;s illness, Sumeragi returned with Eirene, a water maiden from legends old, beauty and grace unrivaled. The nobles may not have liked her nebulous origins, but they praised her enthralling songs, a far better fit for a Hoshidan king than a lady who understood nothing but war. But Eirene refused to give in to the possibility of rivalry and only sought to befriend the embattled queen.</p>
+                <p>&ldquo;It is a waste to overlook the virtues of one so talented,&rdquo; she said to Ikona. &ldquo;How do they not see that your love for country and family is equal to mine?&rdquo;</p>
+                <p>Moved by Eirene&rsquo;s words, Ikona found a true companion, finally understanding why Sumeragi loved her so. Ikona and Sumeragi gave Eirene her official Hoshidan name, Mikoto, and the three of them defied the influence of the royal court and were inseparable. While nobles grumbled at their lack of propriety, much of the Hoshidan common people celebrated the courage of Queen Ikona and the wisdom of Lady Mikoto. Scholars foresaw good fortune and more prosperity following the birth of three more royal children suitable to take the Hoshidan throne. But the optimism would soon come to an end.</p>
+                <p>An uncovered smuggling business along the border was reviving tensions between the east and west lands. Hisashi Amachi, head of the Sky Knight Corps, was then prompted to request assistance from the royal guard to help enforce the additional trade restrictions imposed on his domain, and Ikona answered her brother&rsquo;s plea. While investigating the local watch towers, Ikona uncovered irrefutable evidence that the smuggling ring was sponsored by none other than the Nohrian House Buelen, spearheaded by the royal consort Irma of Buelen. Before she could fly to warn her brother herself, an unsuspecting arrow struck her, sending her plummeting to the forest below.</p>
+                <p>The death of a Hoshidan queen shook the entire nation to its core. Her grieving brother, Hisashi, declared war on the bordering towns and cities on the west lands, and moved to rampage across the fields of Esterlyn and Morbank. The other noble clans and the royal family followed suit in the name of the queen. An age of strife and war began in earnest, all because of a single arrow.</p>
+                <p><a target="_blank" href="http://archiveofourown.org/works/7536472/chapters/22045358#ikona">Read More for Design Notes [TODO]</a></p>
+            </div>
+            <div class="de dkid">
+                <h2>Children</h2>
+                <div class="kid">
+                    <img class="icon" alt="ryoma" src="images/kid_ryoma.png">
+                    <div class="overlay"><p class="overlay_text">Ryoma</p></div>
+                </div>
+                <div class="kid">
+                    <img class="icon" alt="hinoka" src="images/kid_hinoka.png">
+                    <div class="overlay"><p class="overlay_text">Hinoka</p></div>
+                </div>
+                <div class="kid">
+                    <img class="icon" alt="takumi" src="images/kid_takumi.png">
+                    <div class="overlay"><p class="overlay_text">Takumi</p></div>
+                </div>
+                <div class="kid">
+                    <img class="icon" alt="sakura" src="images/kid_sakura.png">
+                    <div class="overlay"><p class="overlay_text">Sakura</p></div>
+                </div>
+            </div>
+            <div class="closebio">Close Bio</div>
+        </div>
+    </div>
+</div>
+
+<div id="credit">
+    <a class="cc" href="http://gadaursan.tumblr.com">❋<span>by gadaursan</span></a>
+</div>
+
+</body>
+</html>
